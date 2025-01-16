@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment variables
+.env.production
+.env.local
+.env.*.local
+
+# Temporary files
+temp_upload/
+tmp/
+temp/
+
+# Logs
+logs
+*.log
+npm-debug
+
+# Build
+dist/
