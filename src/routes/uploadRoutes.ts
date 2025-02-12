@@ -19,6 +19,8 @@ const store = new FileStore({
 
 const tusServer = new Server({
   path: '/upload',
+  relativeLocation: true,
+  respectForwardedHeaders: true,
   datastore: store,
 });
 
@@ -80,6 +82,10 @@ const validateUpload = async (
 };
 
 tusServer.on(EVENTS.POST_FINISH, async (req, res, upload) => {
+
+  console.log('POST_FINISH Request headers:', req.headers);
+
+
   const uploadPath = path.join(__dirname, '../../temp_upload', upload.id);
   let originalName: string | undefined;
   let metadata: VideoMetadata;

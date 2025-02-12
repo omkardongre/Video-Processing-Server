@@ -8,6 +8,8 @@ import { env } from './config/environment';
 
 const app = express();
 
+app.set('trust proxy', true);
+
 app.use(cors());
 
 const server = http.createServer(app);
@@ -20,6 +22,17 @@ const io = new Server(server, {
 });
 
 setupSocketHandler(io);
+
+
+
+app.use((req, res, next) => {
+  if (req.headers['x-forwarded-proto'] === 'https') {
+    Object.defineProperty(req, 'protocol', {
+      get() { return 'https'; }
+    });
+  }
+  next();
+});
 
 app.use('/', uploadRouter);
 
