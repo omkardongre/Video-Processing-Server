@@ -22,12 +22,16 @@ export const handleProFeatures = async (
 
     console.log('🎙️ Transcript generated successfully');
     if (transcript) {
-      const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
       const prompt = `Generate a title and description from this transcription: ${transcript.text}. Return as JSON in this exact format: {"title": "title", "summary": "summary"}`;
 
       const result = await model.generateContent(prompt);
       const response = await result.response;
-      const content = response.text();
+      let content = response.text().trim();
+      // Remove Markdown code block if present
+      if (content.startsWith('```')) {
+        content = content.replace(/```[a-zA-Z]*\n?/, '').replace(/```$/, '').trim();
+      }
       const parsedContent = JSON.parse(content);
 
       await axios.post(`${env.NEXT_API_HOST}/recording/${userId}/transcribe`, {
@@ -38,8 +42,14 @@ export const handleProFeatures = async (
     }
 
     await fs.unlink(audioPath);
-  } catch (error) {
-    console.error('Error in pro features:', error);
+  } catch (error: any) {
+    if (error?.message?.includes('API key not valid')) {
+      console.error(`[PRO FEATURES ERROR] [API_KEY_INVALID] userId=${userId} filename=${filename} msg="${error.message}" stack=${error.stack}`);
+    } else if (error?.response?.status === 400 && error?.response?.data?.error) {
+      console.error(`[PRO FEATURES ERROR] [API_RESPONSE] userId=${userId} filename=${filename} msg="${error.response.data.error}" stack=${error.stack}`);
+    } else {
+      console.error(`[PRO FEATURES ERROR] [UNEXPECTED] userId=${userId} filename=${filename} msg="${error.message}" stack=${error.stack}`);
+    }
     throw error;
   }
 };

@@ -44,8 +44,24 @@ export const handleVideoProcessing = async (
 
     await fs.unlink(filePath);
     console.log(`🗑️ ${filename} deleted successfully`);
-  } catch (error) {
-    console.error('🔴 Error processing video:', error);
+  } catch (error: any) {
+    if (error?.message?.includes('API key not valid')) {
+      console.error(`[VIDEO PROCESSING ERROR] [API_KEY_INVALID] userId=${userId} filename=${filename} plan=${plan} msg="${error.message}" stack=${error.stack}`);
+    } else if (error?.response?.status === 400 && error?.response?.data?.error) {
+      console.error(`[VIDEO PROCESSING ERROR] [API_RESPONSE] userId=${userId} filename=${filename} plan=${plan} msg="${error.response.data.error}" stack=${error.stack}`);
+    } else {
+      console.error(`[VIDEO PROCESSING ERROR] [UNEXPECTED] userId=${userId} filename=${filename} plan=${plan} msg="${error.message}" stack=${error.stack}`);
+    }
+    // --- Cascade addition: Clean up DB entry on failure ---
+    try {
+      await axios.delete(
+        `${env.NEXT_API_HOST}/recording/${userId}/delete`,
+        { data: { filename } }
+      );
+      console.log(`[VIDEO PROCESSING CLEANUP] Deleted video entry from DB for userId=${userId} filename=${filename}`);
+    } catch (cleanupErr) {
+      console.error(`[VIDEO PROCESSING CLEANUP ERROR] Failed to delete video entry from DB userId=${userId} filename=${filename} error=`, cleanupErr);
+    }
     throw error;
   }
 };

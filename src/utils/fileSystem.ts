@@ -15,9 +15,21 @@ export const cleanupFailedUpload = async (filePath?: string): Promise<void> => {
   if (!filePath) return;
 
   try {
-    await fs.access(filePath);
-    await fs.unlink(filePath);
+    // Try to delete the file with .json extension
+    const jsonPath = `${filePath}.json`;
+    try {
+      await fs.access(jsonPath);
+      await fs.unlink(jsonPath);
+    } catch (jsonError) {
+      // If .json file doesn't exist, try the original path
+      try {
+        await fs.access(filePath);
+        await fs.unlink(filePath);
+      } catch (originalError) {
+        console.error(`[CLEANUP ERROR] Failed to cleanup failed upload: filePath=${filePath} error=`, originalError);
+      }
+    }
   } catch (error) {
-    console.error('Failed to cleanup failed upload', error);
+    console.error(`[CLEANUP ERROR] Failed to cleanup failed upload: filePath=${filePath} error=`, error);
   }
 };

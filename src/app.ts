@@ -23,8 +23,6 @@ const io = new Server(server, {
 
 setupSocketHandler(io);
 
-
-
 app.use((req, res, next) => {
   if (req.headers['x-forwarded-proto'] === 'https') {
     Object.defineProperty(req, 'protocol', {

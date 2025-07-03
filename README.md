@@ -140,6 +140,11 @@ npm start
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+## 🔗 Related Projects
+
+- [Web Application](https://github.com/omkardongre/Video-Sharing-Web)
+- [Desktop Application](https://github.com/omkardongre/Video-Sharing-Desktop-App)
+
 ## 📄 License
 
 This project was created for learning purposes, inspired by Web Prodigies https://www.youtube.com/watch?v=3R63m4sTpKo
